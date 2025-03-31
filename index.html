@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>solomd2html.min.js JavaScript Library Example</title>
+<style>
+  li:has([type="checkbox"]) {
+  list-style: none;
+  text-indent: -1.5em;
+}
+.user-content-return-arrow {
+  display: inline-block;
+  height: 12px;
+  vertical-align: middle;
+  fill: #00f;
+}
+section {
+  margin: 0;
+}
+section > section {
+  margin-left: 15px;
+}
+section + section {
+  margin-top: 15px;
+}
+h1 {
+  font-size: 38px;
+}
+h2 {
+  font-size: 32px;
+}
+h3 {
+  font-size: 27px;
+}
+h4 {
+  font-size: 23px;
+}
+h5 {
+  font-size: 20px;
+}
+h6 {
+  font-size: 18px;
+}
+blockquote {
+  padding-left: 10px;
+  border-left: 7px solid #ccc;
+}
+blockquote blockquote {
+  margin-left: 0;
+}
+code {
+  padding: 3px;
+  color: #f8f8f2;
+  background-color: #272822;
+  border-radius: 3px;
+}
+pre code {
+  display: inline-block;
+  padding: 10px;
+  line-height: 1.5em;
+}
+table + table {
+  margin-top: 20px;
+}
+table,
+td,
+th {
+  border-style: solid;
+  border-color: #0d0015;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-width: 1px;
+}
+td,
+th {
+  padding: 5px 10px;
+  vertical-align: top;
+  border-width: 1px 0 0 1px;
+}
+tr:first-child td,
+tr:first-child th {
+  border-top-width: 0;
+}
+td:first-child,
+th:first-child {
+  border-left-width: 0;
+}
+thead + tbody tr:first-child td,
+thead + tbody tr:first-child th {
+  border-top-width: 1px;
+}
+tfoot tr:first-child td,
+tfoot tr:first-child th {
+  border-top-width: 1px;
+}
+sup a {
+  text-decoration: none;
+  color: #00f;
+}
+  html,* { font-family: 'Inter'; box-sizing: border-box; }
+body { background-color: #fafaf7; line-height:1.6;}
+.lead { font-size: 1.5rem; font-weight: 300;background: linear-gradient(to right, #000000 0%, #000000 50%,#999999 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color:transparent; }
+.header { margin: 20px auto; max-width: 960px; }
+h1 {
+  background: linear-gradient( 120deg, #bd34fe 30%, #41d1ff );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+.code-block {
+    position: relative;
+    margin-bottom: 1em;
+}
+.code-ribbon {
+    background: #444;
+    color: white;
+    padding: 4px 8px;
+    font-size: 0.8em;
+    font-family: monospace;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-bottom-right-radius: 5px;
+}
+pre {
+    margin-top: 1.5em;
+    padding: 1em;
+    background: #f5f5f5;
+    overflow: auto;
+}
+pre code {
+  width: 100%;;
+}
+
+</style>
+</head>
+<body>
+  <div class="header">
+  <h1>solomd2html.min.js JavaScript Markdown Library Parser Example</h1>
+<div id="container"></div>
+<script src="solomd2html.js"></script>
+<script>
+
+document.addEventListener("DOMContentLoaded", async e => init(e) );
+let elm_container;
+
+async function init(e){
+  elm_container = document.querySelector(`#container`);
+  const txt = await getText();
+  const res = parse(txt, elm_container);
+}
+
+async function getText(){
+  const response = await fetch(`example.md`);
+  return await response.text();
+}
+</script>
+</body>
+</html>
