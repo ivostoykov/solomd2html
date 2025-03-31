@@ -1,4 +1,5 @@
-function parse(markdownText, rootEl) {
+function parse(markdownText, rootEl, options = {}) {
+    const config = Object.assign({ codeCopy: true }, options);
     const lines = markdownText.replace(/\r\n/g, '\n').split('\n');
     let blocks = processLines(lines);
     blocks = mergeConsecutiveHtmlBlocks(blocks);
@@ -100,20 +101,17 @@ function parse(markdownText, rootEl) {
         const firstLine = lines[0];
         const lastLine = lines[lines.length - 1];
 
-        // Check for fenced block
         const fenceMatch = firstLine.match(/^([`']{3,})(\s*\w+)?/);
         const isFenced = fenceMatch !== null;
         const language = fenceMatch?.[2]?.trim() || 'code';
 
-        // Trim fence lines if present
         if (isFenced) {
-            lines.shift(); // remove opening ```
+            lines.shift();
             if (/^([`']{3,})\s*$/.test(lastLine)) {
-                lines.pop(); // remove closing ```
+                lines.pop();
             }
         }
 
-        // Create wrapper for ribbon + code
         const wrapper = document.createElement('div');
         wrapper.className = 'code-block';
 
@@ -127,11 +125,28 @@ function parse(markdownText, rootEl) {
         el.textContent = '';
         el.appendChild(code);
 
+        // 👇 Add copy button if enabled
+        if (typeof config !== 'undefined' && config.codeCopy) {
+            const btn = document.createElement('button');
+            btn.className = 'code-copy-btn';
+            btn.textContent = '📋';
+            btn.title = 'Copy';
+
+            btn.addEventListener('click', () => {
+                navigator.clipboard.writeText(code.textContent).then(() => {
+                    btn.textContent = '✅';
+                    setTimeout(() => btn.textContent = '📋', 1500);
+                });
+            });
+
+            ribbon.appendChild(btn);
+        }
+
         wrapper.appendChild(ribbon);
         wrapper.appendChild(el);
         return wrapper;
-
     }
+
 
     function renderListContent(content) {
         const lines = content.split('\n');
