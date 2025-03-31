@@ -36,7 +36,26 @@ or use the provided minified version:
 <script src="solomd2html.min.js"></script>
 ```
 
-Once the script is available, use it by passing the Markdown snippet and the target element where the result is intended to appear.
+Once the script is available, you can use it by passing the Markdown snippet and the target element where the output should appear. Optionally, you can provide a third parameter as an object to override default settings. Currently, the available option is:
+
+```json
+{
+  "codeCopy": true
+}
+```
+
+To call the parser, use:
+
+```javascript
+const res = parse(txt, elm_container);
+```
+
+To disable the copy button for source code output, use:
+
+```javascript
+const res = parse(txt, elm_container, { codeCopy: false } );
+```
+
 
 ### Usage in browser example
 
