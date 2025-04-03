@@ -18,25 +18,25 @@ This lightweight JavaScript module provides a dependency-free Markdown-to-HTML p
 # Usage
 
 > [!WARNING]
-> `parse` does not sanitize the HTML. Be cautious when processing user-supplied data and apply necessary sanitization.
+> `parseAdnRender` does not sanitize the HTML. Be cautious when processing user-supplied data and apply necessary sanitization.
 
 ## Browser
 
-Open the provided index.html file.
-
-Include one of the JavaScript files in your HTML:
+Include one of the JavaScript files in your HTML file:
 
 ```html
 <script src="solomd2html.js"></script>
 ```
 
-or use the provided minified version:
+Take a look in the provided index.html file if needed.
+
+A minified version is also provided:
 
 ```html
 <script src="solomd2html.min.js"></script>
 ```
 
-Once the script is available, you can use it by passing the Markdown snippet and the target element where the output should appear. Optionally, you can provide a third parameter as an object to override default settings. Currently, the available option is:
+Once the script is available, you can use it by passing the Markdown snippet and the target element where the output should appear. Optionally, you can provide a [third parameter](#options) as an object to override default settings. Currently, the available option is:
 
 ```json
 {
@@ -47,17 +47,28 @@ Once the script is available, you can use it by passing the Markdown snippet and
 To call the parser, use:
 
 ```javascript
-const res = parse(txt, elm_container);
+const res = parseAdnRender(txt, elm_container);
 ```
 
 To disable the copy button for source code output, use:
 
 ```javascript
-const res = parse(txt, elm_container, { codeCopy: false } );
+const res = parseAdnRender(txt, elm_container, { codeCopy: false } );
 ```
 
+## Parameters
 
-### Usage in browser example
+- `txt` - The markdown text that will be transformed.
+- `elm_container` - The root element to which the output will be appended.
+
+## Options
+
+The third parameter is an object that accepts additional settings for managing the output:
+
+- `codeCopy` (`boolean`) - If `true`, a Copy button is added to each code block. Default value is `true`.
+- `streamReply` (`boolean`) - If `true`, the output will be streamed; otherwise, the entire block will be appended to the given root.  Default value is `true`.
+
+### Script usage example
 
 Ensure an element is available in the DOM for appending parsed HTML:
 
@@ -66,7 +77,7 @@ document.addEventListener("DOMContentLoaded", async e => init(e) );
 async function init(e){
   elm_container = document.querySelector(`#container`);
   const txt = await getText();
-  const res = parse(txt, elm_container);
+  const res = parseAdnRender(txt, elm_container);
 }
 
 async function getText(){
@@ -74,6 +85,8 @@ async function getText(){
   return await response.text();
 }
 ```
+
+The script exports itself as a module, allowing it to be used in Node.js.
 
 Feel free to use the [Issues section](https://github.com/ivostoykov/solomd2html/issues) for bug reports and suggestions.
 
