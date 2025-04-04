@@ -6,14 +6,11 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
 
     for (const bl of blocks) {
         const el = renderBlock(bl);
-        if (!el) {
-            console.error("renderBlock failed!");
-            continue;
-        }
+        if (!el) {  continue;  }
         const nodes = Array.isArray(el) ? el : (el instanceof DocumentFragment ? Array.from(el.childNodes) : [el]);
         for (const node of nodes) {
             if (config.streamReply) {
-                    await streamNode(node, rootEl);
+                await streamNode(node, rootEl);
             } else {
                 rootEl.appendChild(node);
             }
@@ -130,6 +127,7 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
           for (const attr of srcNode.attributes) {
             clone.setAttribute(attr.name, attr.value);
           }
+          attachCopyHandler(clone); // reattach click on the copy button
           targetParent.appendChild(clone);
           for (const child of Array.from(srcNode.childNodes)) {
             await streamNode(child, clone);
@@ -381,9 +379,9 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
     }
 
     function detectBlockType(line) {
+        if (/^\s*([`']{3,})\s{0,}(\w+)?\s*$/.test(line)) return 'fence';
         if (/^\s{0,3}>/.test(line)) return 'blockquote';
         if (/^\s*([-+*]|\d+\.)\s/.test(line)) return 'list';
-        if (/^\s*([`']{3,})\s{0,}(\w+)?\s*$/.test(line)) return 'fence';
         if (/^(\s{4,}|\t)/.test(line)) return 'indented';
         if (/^\s*<.+?>/.test(line)) return 'html';
         if (/^#{1,6}\s+/.test(line)) return 'heading';
@@ -405,6 +403,20 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
             return iaFneceOpened && isSameBlockType && isFenceTerminator;
         }
         return currentType !== newType;
+    }
+
+    function attachCopyHandler(el) {
+        if (el.classList.contains('code-copy-btn') && !el.dataset.bound) {
+            el.dataset.bound = '1';  // prevents attaching duplicate event listeners.
+            el.addEventListener('click', () => {
+                const code = el.closest('.code-block')?.querySelector('code')?.textContent;
+                if (!code) return;
+                navigator.clipboard.writeText(code).then(() => {
+                    el.textContent = '✅';
+                    setTimeout(() => el.textContent = '📋', 1500);
+                });
+            });
+        }
     }
 }
 
