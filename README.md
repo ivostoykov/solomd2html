@@ -98,14 +98,14 @@ The third parameter is an object that accepts additional settings for managing t
 
 **Example**:
 
-```
+```javascript
 const controller = new AbortController();
 parseAndRender({  abortSignal: controller.signal  });
 ```
 
 Once the signal is available if could be used from outside script. Let's asume we have an abort button:
 
-```
+```javascript
   const abortBtn = document.getElementById('myAbortButton');
   const abortHandler = createAbortHandler(controller, abortBtn);
   abortBtn.addEventListener('click', abortHandler);
@@ -140,7 +140,8 @@ Listeners can be added to these events as well:
 - `renderComplete`
 
 **Listener Example**:
-```
+
+```javascript
 rootEl.addEventListener('renderComplete', renderCompleteFired);
 
 function renderCompleteFired(e){
