@@ -154,7 +154,7 @@ let elm_container;
 async function init(e){
   elm_container = document.querySelector(`#container`);
   const txt = await getText();
-  const res = parse(txt, elm_container);
+  const res = parseAndRender(txt, elm_container);
 }
 
 async function getText(){

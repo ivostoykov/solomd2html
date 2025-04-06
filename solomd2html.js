@@ -1,12 +1,27 @@
 async function parseAndRender(markdownText, rootEl, options = {}) {
-    const config = Object.assign({ codeCopy: true, streamReply: true }, options);
+    const defaults = { codeCopy: true, streamReply: true, abortSignal: null, onAbort: null, onRenderStarted: null, onRendering: null, onRenderComplete: null };
+    const config = Object.assign(defaults, options); 1
+    const { abortSignal } = config;
+    if (abortSignal) {
+        abortSignal.addEventListener('abort', handleAbort, { once: true });
+    }
+
+    rootEl.dataset.status = 'parsing';
+    rootEl.dispatchEvent(new CustomEvent('renderStarted'));
+    config.onRenderStarted?.();
+
     const lines = markdownText.replace(/\r\n/g, '\n').split('\n');
     let blocks = processLines(lines);
     blocks = mergeConsecutiveHtmlBlocks(blocks);
 
+    rootEl.dataset.status = 'rendering';
     for (const bl of blocks) {
+        rootEl.dispatchEvent(new CustomEvent('rendering', { detail: bl }));
+        config.onRendering?.(bl);
+        if (abortSignal?.aborted) { return; }
+
         const el = renderBlock(bl);
-        if (!el) {  continue;  }
+        if (!el) { continue; }
         const nodes = Array.isArray(el) ? el : (el instanceof DocumentFragment ? Array.from(el.childNodes) : [el]);
         for (const node of nodes) {
             if (config.streamReply) {
@@ -15,6 +30,22 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
                 rootEl.appendChild(node);
             }
         }
+    }
+    rootEl.dataset.status = 'renderCompleted';
+    rootEl.dispatchEvent(new CustomEvent('renderComplete'));
+    config.onRenderComplete?.();
+    cleanup();
+    /// end of the main block
+
+    function cleanup() {
+        delete rootEl.dataset.status;
+        abortSignal?.removeEventListener('abort', handleAbort);
+    }
+
+    function handleAbort() {
+        rootEl.dispatchEvent(new CustomEvent('renderAborted'));
+        cleanup();
+        config.onAbort?.();
     }
 
     function processLines(lines) {
@@ -125,7 +156,8 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
         } else if (srcNode.nodeType === Node.ELEMENT_NODE) {
           const clone = document.createElement(srcNode.tagName);
           for (const attr of srcNode.attributes) {
-            clone.setAttribute(attr.name, attr.value);
+                try {  clone.setAttribute(attr.name, attr.value);  }
+                catch (err) {  console.error(`[${_getLineNumber()}] - ${err.message}`, err);  }
           }
           attachCopyHandler(clone); // reattach click on the copy button
           targetParent.appendChild(clone);
@@ -352,8 +384,8 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
             .replace(/`([^`]+)`/g, '<code>$1</code>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/__(.*?)__/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/_(.*?)_/g, '<em>$1</em>')
+            .replace(/\s\*(.*?)\*\s/g, '<em>$1</em>')
+            .replace(/\s_(.*?)_\s/g, '<em>$1</em>')
             .replace(/~~(.*?)~~/g, '<del>$1</del>');
         return span;
     }
@@ -417,6 +449,17 @@ async function parseAndRender(markdownText, rootEl, options = {}) {
                 });
             });
         }
+    }
+
+    function _getLineNumber() {
+        const e = new Error();
+        const stackLines = e.stack.split("\n").map(line => line.trim());
+        let index = stackLines.findIndex(line => line.includes(getLineNumber.name));
+
+        return stackLines[index + 1]
+            ?.replace(/\s{0,}at\s+/, '')
+            ?.replace(/^.*?\/([^\/]+\/[^\/]+:\d+:\d+)$/, '$1')
+            || "Unknown";
     }
 }
 
